@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 65118102793383428}
   - component: {fileID: 23281510130608722}
   - component: {fileID: 114717525001129978}
+  - component: {fileID: 195537527234687270}
   m_Layer: 0
   m_Name: enemy
   m_TagString: enemy
@@ -176,8 +177,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ccb2d33c37746244a636f7ffd05a9ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  max_moveSpeed: 2
-  max_rotationSpeed: 2
+  max_moveSpeed: 3
+  max_rotationSpeed: 3
   mass: 10
   friction: 0.1
   target: {fileID: 0}
@@ -189,6 +190,10 @@ MonoBehaviour:
   timerRotation: 2
   offsetRay: 0.75
   dist: 2
+  pathGO: []
+  nowPoint: 0
+  TargetCatch: {fileID: 0}
+  enemyPursMain: 0
 --- !u!136 &136028494733353102
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -202,3 +207,24 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!195 &195537527234687270
+NavMeshAgent:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1377065467224216}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.25
+  m_Speed: 2
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 1
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0.5
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4

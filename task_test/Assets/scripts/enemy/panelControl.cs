@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AI;
 
 public class panelControl : MonoBehaviour {
     public GameObject prefab;
@@ -48,6 +48,14 @@ public class panelControl : MonoBehaviour {
                 massObj[q].GetComponent<enemyAI>().enemyPursMain = true;
                 massObj[q].GetComponent<enemyAI>().state = enemyAI.stateMove.Arrival;
             }
+        }
+        if(state == stateMove.CollisionAvoidanceNavMesh)
+        {
+            massObj[q].GetComponent<NavMeshAgent>().enabled = true;
+        }
+        else
+        {
+            massObj[q].GetComponent<NavMeshAgent>().enabled = false;
         }
     }
 

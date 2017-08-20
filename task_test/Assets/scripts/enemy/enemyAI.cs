@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.AI;
 
 public class enemyAI : MonoBehaviour {
     public float max_moveSpeed;
@@ -40,29 +39,44 @@ public class enemyAI : MonoBehaviour {
     public enemyAI TargetCatch;
     public bool enemyPursMain;
 
-	void Update () {
+    //navmesh
+    private NavMeshAgent Agent;
+
+    void Start()
+    {
+        Agent = GetComponent<NavMeshAgent>();
+        timer = timerRotation;
+    }
+    void Update () {
 		if(state != stateMove.Idle)
         {
-            nowVelocity += GetVelocity()/mass;
-            nowVelocity -= nowVelocity * friction;
-            if(nowVelocity.magnitude > max_moveSpeed)
+            if (state != stateMove.CollisionAvoidanceNavMesh)
             {
-                nowVelocity = nowVelocity.normalized * max_moveSpeed;
-            }
-            nowVelocity.y = 0;
+                nowVelocity += GetVelocity() / mass;
+                nowVelocity -= nowVelocity * friction;
+                if (nowVelocity.magnitude > max_moveSpeed)
+                {
+                    nowVelocity = nowVelocity.normalized * max_moveSpeed;
+                }
+                nowVelocity.y = 0;
 
-            transform.position += nowVelocity * Time.deltaTime;
-            if(state != stateMove.Wander)
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(nowVelocity), max_rotationSpeed * Time.deltaTime);
+                transform.position += nowVelocity * Time.deltaTime;
+                if (state != stateMove.Wander)
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(nowVelocity), max_rotationSpeed * Time.deltaTime);
+                else
+                {
+                    transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, targetRotation, Time.deltaTime * max_rotationSpeed);
+                    timer -= Time.deltaTime;
+                    if (timer <= 0)
+                    {
+                        targetRotation = new Vector3(0, Random.Range(0, maxAngleRandom), 0);
+                        timer = timerRotation;
+                    }
+                }
+            }
             else
             {
-                transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, targetRotation, Time.deltaTime * max_rotationSpeed);
-                timer -= Time.deltaTime;
-                if(timer <=0)
-                {
-                    targetRotation = new Vector3(0, Random.Range(0, maxAngleRandom), 0);
-                    timer = timerRotation;
-                }
+                Agent.SetDestination(target.transform.position);
             }
         }
 	}
@@ -160,7 +174,7 @@ public class enemyAI : MonoBehaviour {
     Vector3 Pursuit()
     {
         float distance = Vector3.Distance(transform.position, TargetCatch.transform.position);
-        float timeTo = distance/ TargetCatch.max_moveSpeed;
+        float timeTo = distance/TargetCatch.max_moveSpeed;
         Vector3 targetPoint = TargetCatch.transform.position + TargetCatch.nowVelocity * timeTo;
         Vector3 willVelocity = (targetPoint - transform.position).normalized;
         willVelocity *= max_moveSpeed;
