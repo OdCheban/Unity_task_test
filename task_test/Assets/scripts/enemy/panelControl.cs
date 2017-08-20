@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.AI;
 
 public class panelControl : MonoBehaviour {
+    [Header("Settings")]
     public GameObject prefab;
     public float offsetSpawnEnemy;
     public List<GameObject> massObj;
@@ -11,10 +12,9 @@ public class panelControl : MonoBehaviour {
     public enum stateMove { Idle, Seek, Flee, Arrival, Wander, CollisionAvoidance, LeaderFollowing, PathFollowing, Pursuit, CollisionAvoidanceNavMesh, Number }
     public stateMove state = stateMove.Idle;
 
-    //flee
+    [Header("Steering Behaviors: Flee")]
     public GameObject fleeRender;
-
-    //p.fol
+    [Header("Steering Behaviors: Path Following")]
     public Transform[] pathGO;
 
     void SpawnEnemy()

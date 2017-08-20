@@ -2,6 +2,7 @@
 using UnityEngine.AI;
 
 public class enemyAI : MonoBehaviour {
+    [Header("enemySettings")]
     public float max_moveSpeed;
     public float max_rotationSpeed;
     public float mass;
@@ -13,33 +14,32 @@ public class enemyAI : MonoBehaviour {
     public stateMove state = stateMove.Idle;
 
     private Vector3 nowVelocity = Vector3.zero;
-
-    //flee
+    
+    [Header("Steering Behaviors: Flee")]
     public float runRadius;
-
-    //arrival
+    
+    [Header("Steering Behaviors: Arrival")]
     public float slowRadius;
     public float stopRadius;
-
-    //wander
-    Vector3 targetRotation;
+    
+    [Header("Steering Behaviors: Wander")]
+    private Vector3 targetRotation;
     public float maxAngleRandom;
     public float timerRotation;
     float timer;
-
-    //c.avoidance
+    
+    [Header("Steering Behaviors: c.avoidance")]
     public float offsetRay;
     public float dist;
-
-    //p.following
+    
+    [Header("Steering Behaviors: p.following")]
     public Transform[] pathGO;
     public int nowPoint;
-
-    //pursuit
+    
+    [Header("Steering Behaviors: pursuit")]
     public enemyAI TargetCatch;
     public bool enemyPursMain;
 
-    //navmesh
     private NavMeshAgent Agent;
 
     void Start()
@@ -59,7 +59,6 @@ public class enemyAI : MonoBehaviour {
                     nowVelocity = nowVelocity.normalized * max_moveSpeed;
                 }
                 nowVelocity.y = 0;
-
                 transform.position += nowVelocity * Time.deltaTime;
                 if (state != stateMove.Wander)
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(nowVelocity), max_rotationSpeed * Time.deltaTime);
