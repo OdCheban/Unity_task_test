@@ -587,18 +587,18 @@ MonoBehaviour:
 
     4 wander
 
-    5 c.avoidance
+    5 collision.Av
 
     6 l.following
 
 
     Additionally:
 
-    7
+    7 pathFollowing
 
-    8
+    8 pursuit
 
-    9
+    9 collision.Av(NavMesh)
 
     + add
 

@@ -8,7 +8,7 @@ public class panelControl : MonoBehaviour {
     public float offsetSpawnEnemy;
     public List<GameObject> massObj;
     public Text stateNowUI;
-    public enum stateMove { Idle,Seek,Flee,Arrival,Wander,CollisionAvoidance,LeaderFollowing, PathFollowing, Number }
+    public enum stateMove { Idle, Seek, Flee, Arrival, Wander, CollisionAvoidance, LeaderFollowing, PathFollowing, Pursuit, CollisionAvoidanceNavMesh, Number }
     public stateMove state = stateMove.Idle;
 
     //flee
@@ -37,6 +37,18 @@ public class panelControl : MonoBehaviour {
     void getData(int q)
     {
         massObj[q].GetComponent<enemyAI>().state = (enemyAI.stateMove)state;
+        if(state == stateMove.Pursuit)
+        {
+            if(q!=0)
+            {
+                massObj[q].GetComponent<enemyAI>().TargetCatch = massObj[q - 1].GetComponent<enemyAI>();
+            }
+            else
+            {
+                massObj[q].GetComponent<enemyAI>().enemyPursMain = true;
+                massObj[q].GetComponent<enemyAI>().state = enemyAI.stateMove.Arrival;
+            }
+        }
     }
 
 	void Update () {

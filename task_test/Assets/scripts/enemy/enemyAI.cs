@@ -10,7 +10,7 @@ public class enemyAI : MonoBehaviour {
     [HideInInspector]
     public Transform target;
 
-    public enum stateMove { Idle, Seek, Flee, Arrival, Wander, CollisionAvoidance, LeaderFollowing,PathFollowing, Number }
+    public enum stateMove { Idle, Seek, Flee, Arrival, Wander, CollisionAvoidance, LeaderFollowing,PathFollowing,Pursuit,CollisionAvoidanceNavMesh, Number }
     public stateMove state = stateMove.Idle;
 
     private Vector3 nowVelocity = Vector3.zero;
@@ -35,6 +35,10 @@ public class enemyAI : MonoBehaviour {
     //p.following
     public Transform[] pathGO;
     public int nowPoint;
+
+    //pursuit
+    public enemyAI TargetCatch;
+    public bool enemyPursMain;
 
 	void Update () {
 		if(state != stateMove.Idle)
@@ -153,7 +157,15 @@ public class enemyAI : MonoBehaviour {
 
         return willVelocity;
     }
-
+    Vector3 Pursuit()
+    {
+        float distance = Vector3.Distance(transform.position, TargetCatch.transform.position);
+        float timeTo = distance/ TargetCatch.max_moveSpeed;
+        Vector3 targetPoint = TargetCatch.transform.position + TargetCatch.nowVelocity * timeTo;
+        Vector3 willVelocity = (targetPoint - transform.position).normalized;
+        willVelocity *= max_moveSpeed;
+        return willVelocity - nowVelocity;
+    }
 
     Vector3 GetVelocity()
     {
@@ -180,6 +192,10 @@ public class enemyAI : MonoBehaviour {
         if(state == stateMove.PathFollowing)
         {
             return PathFollowing(pathGO[nowPoint]);
+        }
+        if(state == stateMove.Pursuit)
+        {
+            return Pursuit();
         }
         return Vector3.zero;
     }
