@@ -50,7 +50,7 @@ public class enemyAI : MonoBehaviour {
     void Update () {
 		if(state != stateMove.Idle)
         {
-            if (state != stateMove.CollisionAvoidanceNavMesh)
+            if ((state != stateMove.CollisionAvoidanceNavMesh) && (state != stateMove.LeaderFollowing))
             {
                 nowVelocity += GetVelocity() / mass;
                 nowVelocity -= nowVelocity * friction;
@@ -77,8 +77,11 @@ public class enemyAI : MonoBehaviour {
             {
                 Agent.SetDestination(target.transform.position);
             }
+            //LeaderFollowing - заводится отдельная переменная, отвечающая за текущую
+            //позицию врага(значение определяется в panelControl.cs(по порядку от 0 до количества врагов)
+            //далее в зависимости от этой переменной определяется позиция, но лучше не изобретать велосипед, а разобраться в паттерне LeaderFollowing =)
         }
-	}
+    }
 
     Vector3 Seek(Transform targetEnd)
     {

@@ -49,7 +49,7 @@ public class panelControl : MonoBehaviour {
                 massObj[q].GetComponent<enemyAI>().state = enemyAI.stateMove.Arrival;
             }
         }
-        if(state == stateMove.CollisionAvoidanceNavMesh)
+        if((state == stateMove.CollisionAvoidanceNavMesh) || (state == stateMove.LeaderFollowing))
         {
             massObj[q].GetComponent<NavMeshAgent>().enabled = true;
         }
@@ -73,7 +73,10 @@ public class panelControl : MonoBehaviour {
             if (Input.GetKeyDown(i.ToString()))
             {
                 state = (stateMove)i;
-                stateNowUI.text = stateMove.GetName(typeof(stateMove), i);
+                if (state != stateMove.LeaderFollowing)
+                    stateNowUI.text = stateMove.GetName(typeof(stateMove), i);
+                else
+                    stateNowUI.text = "LeaderFollowing(soon)";
 
                 if (state == stateMove.Flee)
                     fleeRender.SetActive(true);
