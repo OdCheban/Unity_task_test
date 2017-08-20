@@ -10,7 +10,7 @@ public class panelControl : MonoBehaviour {
     public Text stateNowUI;
     public enum stateMove { Idle,Seek,Flee,Arrival,Wander,CollisionAvoidance,LeaderFollowing,Number }
     public stateMove state = stateMove.Idle;
-
+    public GameObject fleeRender;
 
     void SpawnEnemy()
     {
@@ -29,6 +29,7 @@ public class panelControl : MonoBehaviour {
 
     void getData(int q)
     {
+        massObj[q].GetComponent<enemyAI>().state = (enemyAI.stateMove)state;
 
     }
 
@@ -47,12 +48,19 @@ public class panelControl : MonoBehaviour {
             {
                 state = (stateMove)i;
                 stateNowUI.text = stateMove.GetName(typeof(stateMove), i);
-            }
 
-            for(int j = 0; j < massObj.Count;j++)
-            {
-                massObj[j].GetComponent<enemyAI>().state = (enemyAI.stateMove)state;
+                if (state == stateMove.Flee)
+                    fleeRender.SetActive(true);
+                else
+                    fleeRender.SetActive(false);
+
+                for (int j = 0; j < massObj.Count; j++)
+                {
+                    getData(j);
+                }
+
             }
+            
 
         }
 

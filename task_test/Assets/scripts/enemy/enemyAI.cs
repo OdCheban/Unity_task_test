@@ -15,6 +15,9 @@ public class enemyAI : MonoBehaviour {
 
     private Vector3 nowVelocity = Vector3.zero;
 
+    //flee
+    public float runRadius;
+
 	void Update () {
 		if(state != stateMove.Idle)
         {
@@ -35,12 +38,24 @@ public class enemyAI : MonoBehaviour {
     {
         return ((targetEnd.position - transform.position).normalized * max_moveSpeed) - nowVelocity;
     }
+    Vector3 Flee(Transform targetEnd)
+    {
+        float distance = Vector3.Distance(transform.position,targetEnd.position);
+        if(distance < runRadius)
+            return -(((targetEnd.position - transform.position).normalized * max_moveSpeed) - nowVelocity);
+        else
+            return Vector3.zero;
+    }
 
     Vector3 GetVelocity()
     {
         if(state == stateMove.Seek)
         {
             return Seek(target);
+        }
+        if(state == stateMove.Flee)
+        {
+            return Flee(target);
         }
         return Vector3.zero;
     }
