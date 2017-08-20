@@ -19,6 +19,7 @@ public class panelControl : MonoBehaviour {
         GameObject unit = (GameObject)Instantiate(prefab, new Vector3(x,1, z), Quaternion.identity);
         unit.GetComponent<enemyAI>().target = gameObject.transform;
         massObj.Add(unit);
+        getData(massObj.Count - 1);
     }
     void DestroyEnemy()
     {

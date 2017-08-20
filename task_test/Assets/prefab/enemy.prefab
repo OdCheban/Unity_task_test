@@ -183,6 +183,8 @@ MonoBehaviour:
   target: {fileID: 0}
   state: 0
   runRadius: 3
+  slowRadius: 2
+  stopRadius: 1
 --- !u!136 &136028494733353102
 CapsuleCollider:
   m_ObjectHideFlags: 1
