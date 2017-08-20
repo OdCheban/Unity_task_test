@@ -22,6 +22,12 @@ public class enemyAI : MonoBehaviour {
     public float slowRadius;
     public float stopRadius;
 
+    //wander
+    Vector3 targetRotation;
+    public float maxAngleRandom;
+    public float timerRotation;
+    float timer;
+
 	void Update () {
 		if(state != stateMove.Idle)
         {
@@ -34,7 +40,18 @@ public class enemyAI : MonoBehaviour {
             nowVelocity.y = 0;
 
             transform.position += nowVelocity * Time.deltaTime;
+            if(state != stateMove.Wander)
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(nowVelocity), max_rotationSpeed * Time.deltaTime);
+            else
+            {
+                transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, targetRotation, Time.deltaTime * max_rotationSpeed);
+                timer -= Time.deltaTime;
+                if(timer <=0)
+                {
+                    targetRotation = new Vector3(0, Random.RandomRange(0, maxAngleRandom), 0);
+                    timer = timerRotation;
+                }
+            }
         }
 	}
 
@@ -64,6 +81,11 @@ public class enemyAI : MonoBehaviour {
             willVelocity *= max_moveSpeed;
         return willVelocity - nowVelocity;
     }
+    Vector3 Wander(Transform targetEnd)
+    {
+        return transform.TransformDirection(Vector3.forward);
+    }
+
     Vector3 GetVelocity()
     {
         if(state == stateMove.Seek)
@@ -77,6 +99,10 @@ public class enemyAI : MonoBehaviour {
         if(state == stateMove.Arrival)
         {
             return Arrival(target);
+        }
+        if(state == stateMove.Wander)
+        {
+            return Wander(target);
         }
         return Vector3.zero;
     }

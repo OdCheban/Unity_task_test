@@ -185,6 +185,8 @@ MonoBehaviour:
   runRadius: 3
   slowRadius: 2
   stopRadius: 1
+  maxAngleRandom: 360
+  timerRotation: 2
 --- !u!136 &136028494733353102
 CapsuleCollider:
   m_ObjectHideFlags: 1
