@@ -1025,6 +1025,10 @@ MonoBehaviour:
   stateNowUI: {fileID: 664810832}
   state: 0
   fleeRender: {fileID: 2126896614}
+  pathGO:
+  - {fileID: 349543945}
+  - {fileID: 1686772237}
+  - {fileID: 1038496334}
 --- !u!1 &1855573641
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,9 +8,14 @@ public class panelControl : MonoBehaviour {
     public float offsetSpawnEnemy;
     public List<GameObject> massObj;
     public Text stateNowUI;
-    public enum stateMove { Idle,Seek,Flee,Arrival,Wander,CollisionAvoidance,LeaderFollowing,Number }
+    public enum stateMove { Idle,Seek,Flee,Arrival,Wander,CollisionAvoidance,LeaderFollowing, PathFollowing, Number }
     public stateMove state = stateMove.Idle;
+
+    //flee
     public GameObject fleeRender;
+
+    //p.fol
+    public Transform[] pathGO;
 
     void SpawnEnemy()
     {
@@ -18,6 +23,7 @@ public class panelControl : MonoBehaviour {
         float z = Random.Range(transform.position.z + offsetSpawnEnemy, transform.position.z - offsetSpawnEnemy);
         GameObject unit = (GameObject)Instantiate(prefab, new Vector3(x,1, z), Quaternion.identity);
         unit.GetComponent<enemyAI>().target = gameObject.transform;
+        unit.GetComponent<enemyAI>().pathGO = pathGO;
         massObj.Add(unit);
         getData(massObj.Count - 1);
     }
@@ -31,7 +37,6 @@ public class panelControl : MonoBehaviour {
     void getData(int q)
     {
         massObj[q].GetComponent<enemyAI>().state = (enemyAI.stateMove)state;
-
     }
 
 	void Update () {

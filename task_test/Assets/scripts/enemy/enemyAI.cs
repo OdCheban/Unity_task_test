@@ -10,7 +10,7 @@ public class enemyAI : MonoBehaviour {
     [HideInInspector]
     public Transform target;
 
-    public enum stateMove { Idle, Seek, Flee, Arrival, Wander, CollisionAvoidance, LeaderFollowing, Number }
+    public enum stateMove { Idle, Seek, Flee, Arrival, Wander, CollisionAvoidance, LeaderFollowing,PathFollowing, Number }
     public stateMove state = stateMove.Idle;
 
     private Vector3 nowVelocity = Vector3.zero;
@@ -31,6 +31,10 @@ public class enemyAI : MonoBehaviour {
     //c.avoidance
     public float offsetRay;
     public float dist;
+
+    //p.following
+    public Transform[] pathGO;
+    public int nowPoint;
 
 	void Update () {
 		if(state != stateMove.Idle)
@@ -135,6 +139,22 @@ public class enemyAI : MonoBehaviour {
         //далее их можно сделать ещё умнее, добавить проверку на застревание + 2 рейкаста 
         return willVelocity;
     }
+    Vector3 PathFollowing(Transform targetEnd)
+    {
+        Vector3 willVelocity = Seek(targetEnd);
+        willVelocity *= max_moveSpeed;
+        float distance = Vector3.Distance(transform.position, targetEnd.position);
+        if (distance < 2)//2 - радиус точки
+        {
+            nowPoint++;
+            if (nowPoint == pathGO.Length)
+                nowPoint = 0;
+        }
+
+        return willVelocity;
+    }
+
+
     Vector3 GetVelocity()
     {
         if(state == stateMove.Seek)
@@ -156,6 +176,10 @@ public class enemyAI : MonoBehaviour {
         if(state == stateMove.CollisionAvoidance)
         {
             return CollisionAvoidance(target);
+        }
+        if(state == stateMove.PathFollowing)
+        {
+            return PathFollowing(pathGO[nowPoint]);
         }
         return Vector3.zero;
     }
