@@ -28,6 +28,10 @@ public class enemyAI : MonoBehaviour {
     public float timerRotation;
     float timer;
 
+    //c.avoidance
+    public float offsetRay;
+    public float dist;
+
 	void Update () {
 		if(state != stateMove.Idle)
         {
@@ -48,7 +52,7 @@ public class enemyAI : MonoBehaviour {
                 timer -= Time.deltaTime;
                 if(timer <=0)
                 {
-                    targetRotation = new Vector3(0, Random.RandomRange(0, maxAngleRandom), 0);
+                    targetRotation = new Vector3(0, Random.Range(0, maxAngleRandom), 0);
                     timer = timerRotation;
                 }
             }
@@ -81,11 +85,56 @@ public class enemyAI : MonoBehaviour {
             willVelocity *= max_moveSpeed;
         return willVelocity - nowVelocity;
     }
-    Vector3 Wander(Transform targetEnd)
+    Vector3 Wander()
     {
         return transform.TransformDirection(Vector3.forward);
     }
-
+    Vector3 CollisionAvoidance(Transform targetEnd)
+    {
+        Vector3 willVelocity = (targetEnd.position - transform.position).normalized;
+        willVelocity *= max_moveSpeed;
+        Vector3 lRay = new Vector3(transform.position.x - offsetRay,transform.position.y,transform.position.z);
+        Vector3 rRay = new Vector3(transform.position.x + offsetRay, transform.position.y, transform.position.z);
+        RaycastHit hit = new RaycastHit();
+        if(Physics.Raycast(transform.position,transform.forward,out hit,dist))
+        {
+            if(hit.transform !=transform)
+            {
+                willVelocity += hit.normal * 1.75f;
+                Debug.DrawLine(transform.position, target.position, Color.red);
+            }
+            else
+            {
+                Debug.DrawLine(transform.position, target.position, Color.blue);
+            }
+        }
+        if (Physics.Raycast(lRay, transform.forward, out hit, dist))
+        {
+            if (hit.transform != transform)
+            {
+                willVelocity += hit.normal * 1.75f;
+                Debug.DrawLine(lRay, target.position, Color.red);
+            }
+            else
+            {
+                Debug.DrawLine(lRay, target.position, Color.blue);
+            }
+        }
+        if (Physics.Raycast(rRay, transform.forward, out hit, dist))
+        {
+            if (hit.transform != transform)
+            {
+                willVelocity += hit.normal * 1.75f;
+                Debug.DrawLine(rRay, target.position, Color.red);
+            }
+            else
+            {
+                Debug.DrawLine(rRay, target.position, Color.blue);
+            }
+        }
+        //далее их можно сделать ещё умнее, добавить проверку на застревание + 2 рейкаста 
+        return willVelocity;
+    }
     Vector3 GetVelocity()
     {
         if(state == stateMove.Seek)
@@ -102,7 +151,11 @@ public class enemyAI : MonoBehaviour {
         }
         if(state == stateMove.Wander)
         {
-            return Wander(target);
+            return Wander();
+        }
+        if(state == stateMove.CollisionAvoidance)
+        {
+            return CollisionAvoidance(target);
         }
         return Vector3.zero;
     }

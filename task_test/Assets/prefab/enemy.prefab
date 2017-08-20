@@ -187,6 +187,8 @@ MonoBehaviour:
   stopRadius: 1
   maxAngleRandom: 360
   timerRotation: 2
+  offsetRay: 0.75
+  dist: 2
 --- !u!136 &136028494733353102
 CapsuleCollider:
   m_ObjectHideFlags: 1
