@@ -42,7 +42,8 @@ public class enemyAI : MonoBehaviour {
 
     [Header("Steering Behaviors: Leader Following")]
     public float distLeader;
-    public float distOtherEnemy = 2.5f;
+    public float distOtherEnemy;
+    public float goAway;
     public GameObject[] enemyMas;
 
     private NavMeshAgent Agent;
@@ -214,6 +215,8 @@ public class enemyAI : MonoBehaviour {
             force *= -1;
         }
         willVelocity += force.normalized;
+        if (goAway > distance)
+            willVelocity += Flee(target);
         return willVelocity;
     }
     Vector3 GetVelocity()

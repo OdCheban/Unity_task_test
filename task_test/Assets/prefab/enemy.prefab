@@ -196,6 +196,7 @@ MonoBehaviour:
   enemyPursMain: 0
   distLeader: 3
   distOtherEnemy: 1.5
+  goAway: 1.5
   enemyMas: []
 --- !u!136 &136028494733353102
 CapsuleCollider:
