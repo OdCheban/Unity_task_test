@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class enemyAI : MonoBehaviour {
     [Header("enemySettings")]
@@ -8,7 +9,7 @@ public class enemyAI : MonoBehaviour {
     public float mass;
     public float friction;
     [HideInInspector]
-    public Transform target;
+    public GameObject target;
 
     public enum stateMove { Idle, Seek, Flee, Arrival, Wander, CollisionAvoidance, LeaderFollowing,PathFollowing,Pursuit,CollisionAvoidanceNavMesh, Number }
     public stateMove state = stateMove.Idle;
@@ -37,8 +38,8 @@ public class enemyAI : MonoBehaviour {
     public int nowPoint;
     
     [Header("Steering Behaviors: Pursuit")]
-    public enemyAI TargetCatch;
-    public bool enemyPursMain;
+    public GameObject targetCatch;
+    public int kPurs = -1;
 
     [Header("Steering Behaviors: Leader Following")]
     public float distLeader;
@@ -46,13 +47,17 @@ public class enemyAI : MonoBehaviour {
     public float goAway;
     public GameObject[] enemyMas;
 
+    [Header("UI")]
+    public bool click;
+    public GameObject[] btn;
+    public Text stateNowUI;
+
     private NavMeshAgent Agent;
 
     void Start()
     {
         Agent = GetComponent<NavMeshAgent>();
         timer = timerRotation;
-        enemyMas = GameObject.FindGameObjectsWithTag("enemy");
     }
     void Update () {
 		if(state != stateMove.Idle)
@@ -132,11 +137,11 @@ public class enemyAI : MonoBehaviour {
             if(hit.transform !=transform)
             {
                 willVelocity += hit.normal * 1.75f;
-                Debug.DrawLine(transform.position, target.position, Color.red);
+                Debug.DrawLine(transform.position, target.transform.position, Color.red);
             }
             else
             {
-                Debug.DrawLine(transform.position, target.position, Color.blue);
+                Debug.DrawLine(transform.position, target.transform.position, Color.blue);
             }
         }
         if (Physics.Raycast(lRay, transform.forward, out hit, dist))
@@ -144,11 +149,11 @@ public class enemyAI : MonoBehaviour {
             if (hit.transform != transform)
             {
                 willVelocity += hit.normal * 1.75f;
-                Debug.DrawLine(lRay, target.position, Color.red);
+                Debug.DrawLine(lRay, target.transform.position, Color.red);
             }
             else
             {
-                Debug.DrawLine(lRay, target.position, Color.blue);
+                Debug.DrawLine(lRay, target.transform.position, Color.blue);
             }
         }
         if (Physics.Raycast(rRay, transform.forward, out hit, dist))
@@ -156,11 +161,11 @@ public class enemyAI : MonoBehaviour {
             if (hit.transform != transform)
             {
                 willVelocity += hit.normal * 1.75f;
-                Debug.DrawLine(rRay, target.position, Color.red);
+                Debug.DrawLine(rRay, target.transform.position, Color.red);
             }
             else
             {
-                Debug.DrawLine(rRay, target.position, Color.blue);
+                Debug.DrawLine(rRay, target.transform.position, Color.blue);
             }
         }
         //далее их можно сделать ещё умнее, добавить проверку на застревание + 2 рейкаста 
@@ -180,11 +185,13 @@ public class enemyAI : MonoBehaviour {
 
         return willVelocity;
     }
-    Vector3 Pursuit()
+    Vector3 Pursuit(Transform targetEnd)
     {
-        float distance = Vector3.Distance(transform.position, TargetCatch.transform.position);
-        float timeTo = distance/TargetCatch.max_moveSpeed;
-        Vector3 targetPoint = TargetCatch.transform.position + TargetCatch.nowVelocity * timeTo;
+        float distance = Vector3.Distance(transform.position, targetCatch.transform.position);
+        float timeTo = distance/max_moveSpeed;
+        //float timeTo = distance / TargetCatch.max_moveSpeed;
+        //Vector3 targetPoint = TargetCatch.transform.position + TargetCatch.nowVelocity * timeTo;
+        Vector3 targetPoint = targetCatch.transform.position + nowVelocity * timeTo;
         Vector3 willVelocity = (targetPoint - transform.position).normalized;
         willVelocity *= max_moveSpeed;
         return willVelocity - nowVelocity;
@@ -216,44 +223,110 @@ public class enemyAI : MonoBehaviour {
         }
         willVelocity += force.normalized;
         if (goAway > distance)
-            willVelocity += Flee(target);
+            willVelocity += Flee(target.transform);
         return willVelocity;
     }
     Vector3 GetVelocity()
     {
-        if(state == stateMove.Seek)
+        switch(state)
         {
-            return Seek(target);
+            case stateMove.Seek:
+                return Seek(target.transform);
+            case stateMove.Flee:
+                return Flee(target.transform);
+            case stateMove.Arrival:
+                return Arrival(target.transform);
+            case stateMove.Wander:
+                return Wander();
+            case stateMove.CollisionAvoidance:
+                return CollisionAvoidance(target.transform);
+            case stateMove.PathFollowing:
+                return PathFollowing(pathGO[nowPoint]);
+            case stateMove.Pursuit:
+                {
+                    if(targetCatch.tag != "Player")
+                    if (targetCatch.GetComponent<enemyAI>().kPurs == -1)
+                        stateNowUI.text = "error";
+                    return Pursuit(targetCatch.transform);
+                }
+            case stateMove.LeaderFollowing:
+                return FollowLeader(target.transform);
+            default:
+                return Vector3.zero;
         }
-        if(state == stateMove.Flee)
+      
+    }
+
+    void searchTargetPursit()
+    {
+        //цепляемся за игроком или ищем последнего в очереди enemyMas
+        bool mainEnemy = false;
+        foreach(GameObject obj in enemyMas)
         {
-            return Flee(target);
+            if(obj.GetComponent<enemyAI>().kPurs == 0)
+            {
+                mainEnemy = true;
+            }
         }
-        if(state == stateMove.Arrival)
+        if(!mainEnemy)
         {
-            return Arrival(target);
+            kPurs = 0;
+            targetCatch = target;
         }
-        if(state == stateMove.Wander)
+        else
         {
-            return Wander();
+            int max = 0;
+            GameObject targetMax = null;
+            for(int i = 0;i < enemyMas.Length; i++)
+            {
+                int nowElem = enemyMas[i].GetComponent<enemyAI>().kPurs;
+                if ((nowElem != -1) && (nowElem >= max))
+                {
+                    targetMax = enemyMas[i];
+                    max = nowElem;
+                }
+            }
+            targetCatch = targetMax;
+            kPurs = max + 1;
         }
-        if(state == stateMove.CollisionAvoidance)
+    }
+   public void ChangeUIText(int q)
+    {
+        stateNowUI.text = q.ToString();
+    }
+    void ContinueGame()
+    {
+        click = !click;
+        foreach (GameObject s in btn)
         {
-            return CollisionAvoidance(target);
+            s.SetActive(click);
         }
-        if(state == stateMove.PathFollowing)
+        if (click)
+            Time.timeScale = 0;
+        else
+            Time.timeScale = 1;
+    }
+    public void Action(int q)
+    {
+        state = (stateMove)q;
+        ChangeUIText(q);
+        ContinueGame();
+        if(q == 9)
         {
-            return PathFollowing(pathGO[nowPoint]);
+            GetComponent<NavMeshAgent>().enabled = true;
         }
-        if(state == stateMove.Pursuit)
+        if(q == 8)
         {
-            return Pursuit();
+            searchTargetPursit();
         }
-        if (state == stateMove.LeaderFollowing)
+        else
         {
-            return FollowLeader(target);
+            kPurs = -1;
         }
-        return Vector3.zero;
+    }
+    public void Menu()
+    {
+        ContinueGame();
     }
 
 }

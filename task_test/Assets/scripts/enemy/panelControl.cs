@@ -22,7 +22,6 @@ public class panelControl : MonoBehaviour {
         float x = Random.Range(transform.position.x + offsetSpawnEnemy, transform.position.x - offsetSpawnEnemy);
         float z = Random.Range(transform.position.z + offsetSpawnEnemy, transform.position.z - offsetSpawnEnemy);
         GameObject unit = (GameObject)Instantiate(prefab, new Vector3(x,1, z), Quaternion.identity);
-        unit.GetComponent<enemyAI>().target = gameObject.transform;
         unit.GetComponent<enemyAI>().pathGO = pathGO;
         massObj.Add(unit);
         getData(massObj.Count - 1);
@@ -37,17 +36,23 @@ public class panelControl : MonoBehaviour {
     void getData(int q)
     {
         massObj[q].GetComponent<enemyAI>().state = (enemyAI.stateMove)state;
+        massObj[q].GetComponent<enemyAI>().target = GameObject.FindGameObjectWithTag("Player");
+        massObj[q].GetComponent<enemyAI>().ChangeUIText((int)state);
         if(state == stateMove.Pursuit)
         {
             if(q!=0)
             {
-                massObj[q].GetComponent<enemyAI>().TargetCatch = massObj[q - 1].GetComponent<enemyAI>();
+                massObj[q].GetComponent<enemyAI>().targetCatch = massObj[q - 1];
             }
             else
             {
-                massObj[q].GetComponent<enemyAI>().enemyPursMain = true;
-                massObj[q].GetComponent<enemyAI>().state = enemyAI.stateMove.Arrival;
+                massObj[q].GetComponent<enemyAI>().targetCatch = gameObject;
             }
+            massObj[q].GetComponent<enemyAI>().kPurs = q;
+        }
+        else
+        {
+            massObj[q].GetComponent<enemyAI>().kPurs = -1;
         }
         if(state == stateMove.CollisionAvoidanceNavMesh)
         {
@@ -59,7 +64,7 @@ public class panelControl : MonoBehaviour {
         }
         for (int j = 0; j < massObj.Count; j++)
         {
-            massObj[j].GetComponent<enemyAI>().enemyMas = GameObject.FindGameObjectsWithTag("enemy");
+            massObj[j].GetComponent<enemyAI>().enemyMas = GameObject.FindGameObjectsWithTag("Enemy");
         }
     }
 
