@@ -28,17 +28,22 @@ public class enemyAI : MonoBehaviour {
     public float timerRotation;
     float timer;
     
-    [Header("Steering Behaviors: c.avoidance")]
+    [Header("Steering Behaviors: C.avoidance")]
     public float offsetRay;
     public float dist;
     
-    [Header("Steering Behaviors: p.following")]
+    [Header("Steering Behaviors: P.following")]
     public Transform[] pathGO;
     public int nowPoint;
     
-    [Header("Steering Behaviors: pursuit")]
+    [Header("Steering Behaviors: Pursuit")]
     public enemyAI TargetCatch;
     public bool enemyPursMain;
+
+    [Header("Steering Behaviors: Leader Following")]
+    public float distLeader;
+    public float distOtherEnemy = 2.5f;
+    public GameObject[] enemyMas;
 
     private NavMeshAgent Agent;
 
@@ -46,11 +51,12 @@ public class enemyAI : MonoBehaviour {
     {
         Agent = GetComponent<NavMeshAgent>();
         timer = timerRotation;
+        enemyMas = GameObject.FindGameObjectsWithTag("enemy");
     }
     void Update () {
 		if(state != stateMove.Idle)
         {
-            if ((state != stateMove.CollisionAvoidanceNavMesh) && (state != stateMove.LeaderFollowing))
+            if (state != stateMove.CollisionAvoidanceNavMesh)
             {
                 nowVelocity += GetVelocity() / mass;
                 nowVelocity -= nowVelocity * friction;
@@ -61,7 +67,10 @@ public class enemyAI : MonoBehaviour {
                 nowVelocity.y = 0;
                 transform.position += nowVelocity * Time.deltaTime;
                 if (state != stateMove.Wander)
+                {
+                    if(nowVelocity != Vector3.zero)
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(nowVelocity), max_rotationSpeed * Time.deltaTime);
+                }
                 else
                 {
                     transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, targetRotation, Time.deltaTime * max_rotationSpeed);
@@ -77,9 +86,6 @@ public class enemyAI : MonoBehaviour {
             {
                 Agent.SetDestination(target.transform.position);
             }
-            //LeaderFollowing - заводится отдельная переменная, отвечающая за текущую
-            //позицию врага(значение определяется в panelControl.cs(по порядку от 0 до количества врагов)
-            //далее в зависимости от этой переменной определяется позиция, но лучше не изобретать велосипед, а разобраться в паттерне LeaderFollowing =)
         }
     }
 
@@ -182,7 +188,34 @@ public class enemyAI : MonoBehaviour {
         willVelocity *= max_moveSpeed;
         return willVelocity - nowVelocity;
     }
-
+    Vector3 FollowLeader(Transform targetEnd)
+    {
+        Vector3 willVelocity = Vector3.zero;
+        float distance = Vector3.Distance(transform.position, targetEnd.position);
+        if (distance > distLeader)
+        {
+            willVelocity += (Arrival(target.transform));
+        }
+        Vector3 force = Vector3.zero;//относительно других юнитов, а не таргета
+        int k = 0;
+        for (int i = 0; i < enemyMas.Length; i++)
+        {
+            if ((enemyMas[i] != this) && (Vector3.Distance(enemyMas[i].transform.position, transform.position) < distOtherEnemy))
+            {
+                force.x += enemyMas[i].transform.position.x - transform.position.x;
+                force.z += enemyMas[i].transform.position.z - transform.position.z;
+                k++;
+            }
+        }
+        if (k != 0)
+        {
+            force.x /= k;
+            force.z /= k;
+            force *= -1;
+        }
+        willVelocity += force.normalized;
+        return willVelocity;
+    }
     Vector3 GetVelocity()
     {
         if(state == stateMove.Seek)
@@ -212,6 +245,10 @@ public class enemyAI : MonoBehaviour {
         if(state == stateMove.Pursuit)
         {
             return Pursuit();
+        }
+        if (state == stateMove.LeaderFollowing)
+        {
+            return FollowLeader(target);
         }
         return Vector3.zero;
     }

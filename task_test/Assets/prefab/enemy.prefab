@@ -162,7 +162,7 @@ BoxCollider:
   m_GameObject: {fileID: 1377065467224216}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -178,7 +178,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   max_moveSpeed: 3
-  max_rotationSpeed: 3
+  max_rotationSpeed: 0.5
   mass: 10
   friction: 0.1
   target: {fileID: 0}
@@ -186,7 +186,7 @@ MonoBehaviour:
   runRadius: 3
   slowRadius: 2
   stopRadius: 1
-  maxAngleRandom: 360
+  maxAngleRandom: 180
   timerRotation: 2
   offsetRay: 0.75
   dist: 2
@@ -194,6 +194,9 @@ MonoBehaviour:
   nowPoint: 0
   TargetCatch: {fileID: 0}
   enemyPursMain: 0
+  distLeader: 3
+  distOtherEnemy: 1.5
+  enemyMas: []
 --- !u!136 &136028494733353102
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -202,7 +205,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 1712090575082582}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
@@ -213,7 +216,7 @@ NavMeshAgent:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1377065467224216}
-  m_Enabled: 1
+  m_Enabled: 0
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 2
